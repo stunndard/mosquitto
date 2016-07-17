@@ -103,6 +103,8 @@ enum mosquitto_client_state {
 	mosq_cs_socks5_userpass_reply = 13,
 	mosq_cs_socks5_send_userpass = 14,
 	mosq_cs_expiring = 15,
+	mosq_cs_httpproxy_new = 16,
+	mosq_cs_httpproxy_start = 17,
 };
 
 enum _mosquitto_protocol {
@@ -227,6 +229,14 @@ struct mosquitto {
 	char *socks5_username;
 	char *socks5_password;
 #  endif
+#  ifdef WITH_HTTP_PROXY
+	char *httpproxy_host;
+	int httpproxy_port;
+	char *httpproxy_username;
+	char *httpproxy_password;
+#  endif
+
+
 	void *userdata;
 	bool in_callback;
 	unsigned int message_retry;

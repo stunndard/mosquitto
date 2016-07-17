@@ -31,7 +31,7 @@ Contributors:
 #include <mosquitto.h>
 #include "client_shared.h"
 
-static int mosquitto__parse_socks_url(struct mosq_config *cfg, char *url);
+static int mosquitto__parse_proxy_url(struct mosq_config *cfg, char *url);
 static int client_config_line_proc(struct mosq_config *cfg, int pub_or_sub, int argc, char *argv[]);
 
 void init_config(struct mosq_config *cfg)
@@ -88,6 +88,13 @@ void client_config_cleanup(struct mosq_config *cfg)
 	free(cfg->socks5_username);
 	free(cfg->socks5_password);
 #endif
+#ifdef WITH_HTTP_PROXY
+	free(cfg->httpproxy_host);
+	free(cfg->httpproxy_username);
+	free(cfg->httpproxy_password);
+#endif
+
+
 }
 
 int client_config_load(struct mosq_config *cfg, int pub_or_sub, int argc, char *argv[])
@@ -464,7 +471,7 @@ int client_config_line_proc(struct mosq_config *cfg, int pub_or_sub, int argc, c
 				fprintf(stderr, "Error: --proxy argument given but no proxy url specified.\n\n");
 				return 1;
 			}else{
-				if(mosquitto__parse_socks_url(cfg, argv[i+1])){
+				if(mosquitto__parse_proxy_url(cfg, argv[i+1])){
 					return 1;
 				}
 				i++;
@@ -706,6 +713,17 @@ int client_opts_set(struct mosquitto *mosq, struct mosq_config *cfg)
 		}
 	}
 #endif
+#ifdef WITH_HTTP_PROXY
+	if(cfg->httpproxy_host){
+		rc = mosquitto_httpproxy_set(mosq, cfg->httpproxy_host, cfg->httpproxy_port, cfg->httpproxy_username, cfg->httpproxy_password);
+		if(rc){
+			mosquitto_lib_cleanup();
+			return rc;
+		}
+	}
+#endif
+
+
 	mosquitto_opts_set(mosq, MOSQ_OPT_PROTOCOL_VERSION, &(cfg->protocol_version));
 	return MOSQ_ERR_SUCCESS;
 }
@@ -821,7 +839,7 @@ static int mosquitto__urldecode(char *str)
 	return 0;
 }
 
-static int mosquitto__parse_socks_url(struct mosq_config *cfg, char *url)
+static int mosquitto__parse_proxy_url(struct mosq_config *cfg, char *url)
 {
 	char *str;
 	int i;
@@ -831,9 +849,14 @@ static int mosquitto__parse_socks_url(struct mosq_config *cfg, char *url)
 	int len;
 	bool have_auth = false;
 	int port_int;
+	int proxytype;
 
 	if(!strncmp(url, "socks5h://", strlen("socks5h://"))){
 		str = url + strlen("socks5h://");
+		proxytype = 0;
+	}else if(!strncmp(url, "httpproxy://", strlen("httpproxy://"))){
+		str = url + strlen("httprpoxy://");
+		proxytype = 1;
 	}else{
 		fprintf(stderr, "Error: Unsupported proxy protocol: %s\n", url);
 		return 1;
@@ -951,10 +974,18 @@ static int mosquitto__parse_socks_url(struct mosq_config *cfg, char *url)
 		port_int = 1080;
 	}
 
-	cfg->socks5_username = username;
-	cfg->socks5_password = password;
-	cfg->socks5_host = host;
-	cfg->socks5_port = port_int;
+	if(proxytype == 0){
+	    cfg->socks5_username = username;
+	    cfg->socks5_password = password;
+	    cfg->socks5_host = host;
+	    cfg->socks5_port = port_int;
+	}else{
+	    cfg->httpproxy_username = username;
+	    cfg->httpproxy_password = password;
+	    cfg->httpproxy_host = host;
+	    cfg->httpproxy_port = port_int;
+	}
+
 
 	return 0;
 cleanup:

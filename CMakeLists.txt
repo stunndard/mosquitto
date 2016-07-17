@@ -77,6 +77,11 @@ if (${WITH_SOCKS} STREQUAL ON)
 	add_definitions("-DWITH_SOCKS")
 endif (${WITH_SOCKS} STREQUAL ON)
 
+option(WITH_HTTP_PROXY "Include HTTP proxy support?" ON)
+if (${WITH_HTTP_PROXY} STREQUAL ON)
+	add_definitions("-DWITH_HTTP_PROXY")
+endif (${WITH_HTTP_PROXY} STREQUAL ON)
+
 option(WITH_SRV "Include SRV lookup support?" ON)
 
 # ========================================

@@ -203,6 +203,7 @@ int mosquitto__socks5_read(struct mosquitto *mosq)
 	ssize_t len;
 	uint8_t *payload;
 	uint8_t i;
+	int rc;
 
 	if(mosq->state == mosq_cs_socks5_start){
 		while(mosq->in_packet.to_process > 0){
@@ -364,6 +365,10 @@ int mosquitto__socks5_read(struct mosquitto *mosq)
 			/* Auth passed */
 			_mosquitto_packet_cleanup(&mosq->in_packet);
 			mosq->state = mosq_cs_new;
+#ifdef WITH_TLS
+                        rc = _mosquitto_socket_starttls(mosq);
+                        if(rc != MOSQ_ERR_SUCCESS) return rc;
+#endif
 			return _mosquitto_send_connect(mosq, mosq->keepalive, mosq->clean_session);
 		}else{
 			i = mosq->in_packet.payload[1];

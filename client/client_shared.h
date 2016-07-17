@@ -86,6 +86,14 @@ struct mosq_config {
 	char *socks5_username;
 	char *socks5_password;
 #endif
+#ifdef WITH_HTTP_PROXY
+	char *httpproxy_host;
+	int httpproxy_port;
+	char *httpproxy_username;
+	char *httpproxy_password;
+#endif
+
+
 };
 
 int client_config_load(struct mosq_config *config, int pub_or_sub, int argc, char *argv[]);

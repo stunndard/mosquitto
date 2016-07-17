@@ -34,6 +34,7 @@ add_library(libmosquitto SHARED
 	send_client_mosq.c
 	send_mosq.c send_mosq.h
 	socks_mosq.c
+	httpproxy_mosq.c
 	srv_mosq.c
 	thread_mosq.c
 	time_mosq.c

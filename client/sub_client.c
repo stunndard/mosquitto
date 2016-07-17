@@ -150,6 +150,9 @@ void print_usage(void)
 #ifdef WITH_SOCKS
 	printf("                     [--proxy socks-url]\n");
 #endif
+#ifdef WITH_HTTP_PROXY
+	printf("                     [--proxy httpproxy-url]\n");
+#endif
 	printf("       mosquitto_sub --help\n\n");
 	printf(" -A : bind the outgoing socket to this host/ip address. Use to control which interface\n");
 	printf("      the client communicates over.\n");
@@ -207,6 +210,13 @@ void print_usage(void)
 	printf("           socks5h://[username[:password]@]hostname[:port]\n");
 	printf("           Only \"none\" and \"username\" authentication is supported.\n");
 #endif
+#ifdef WITH_HTTP_PROXY
+	printf(" --proxy : HTTP proxy URL of the form:\n");
+	printf("           httpproxy://[username[:password]@]hostname[:port]\n");
+	printf("           Only \"none\" and \"Basic\" authentication is supported.\n");
+#endif
+
+
 	printf("\nSee http://mosquitto.org/ for more information.\n\n");
 }
 

@@ -403,25 +403,29 @@ int mosquitto__socket_connect_tls(struct mosquitto *mosq)
 }
 #endif
 
-/* Create a socket and connect it to 'ip' on port 'port'.
- * Returns -1 on failure (ip is NULL, socket creation/connection error)
- * Returns sock number on success.
- */
-int _mosquitto_socket_connect(struct mosquitto *mosq, const char *host, uint16_t port, const char *bind_address, bool blocking)
+int _mosquitto_socket_connect_notls(struct mosquitto *mosq, const char *host, uint16_t port, const char *bind_address, bool blocking)
 {
 	mosq_sock_t sock = INVALID_SOCKET;
 	int rc;
-#ifdef WITH_TLS
-	int ret;
-	BIO *bio;
-#endif
 
 	if(!mosq || !host || !port) return MOSQ_ERR_INVAL;
 
 	rc = _mosquitto_try_connect(mosq, host, port, &sock, bind_address, blocking);
 	if(rc > 0) return rc;
+	mosq->sock = sock;
+
+	return rc;
+}
 
 #ifdef WITH_TLS
+int _mosquitto_socket_starttls(struct mosquitto *mosq)
+{
+	mosq_sock_t sock;
+	int ret;
+	BIO *bio;
+
+	sock = mosq->sock;
+
 	if(mosq->tls_cafile || mosq->tls_capath || mosq->tls_psk){
 #if OPENSSL_VERSION_NUMBER >= 0x10001000L
 		if(!mosq->tls_version || !strcmp(mosq->tls_version, "tlsv1.2")){
@@ -556,10 +560,35 @@ int _mosquitto_socket_connect(struct mosquitto *mosq, const char *host, uint16_t
 		}
 
 	}
+    	mosq->sock = sock;
+
+	return MOSQ_ERR_SUCCESS;
+}
 #endif
+
+
+
+/* Create a socket and connect it to 'ip' on port 'port'.
+ * Returns -1 on failure (ip is NULL, socket creation/connection error)
+ * Returns sock number on success.
+ */
+int _mosquitto_socket_connect(struct mosquitto *mosq, const char *host, uint16_t port, const char *bind_address, bool blocking)
+{
+	mosq_sock_t sock = INVALID_SOCKET;
+	int rc;
+
+	if(!mosq || !host || !port) return MOSQ_ERR_INVAL;
+
+	rc = _mosquitto_try_connect(mosq, host, port, &sock, bind_address, blocking);
+	if(rc > 0) return rc;
 
 	mosq->sock = sock;
 
+#ifdef WITH_TLS
+	rc = _mosquitto_socket_starttls(mosq);
+#endif
+
+	//mosq->sock = sock;
 	return rc;
 }
 

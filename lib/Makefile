@@ -13,6 +13,7 @@ MOSQ_OBJS=mosquitto.o \
 		  send_mosq.o \
 		  send_client_mosq.o \
 		  socks_mosq.o \
+		  httpproxy_mosq.o \
 		  srv_mosq.o \
 		  thread_mosq.o \
 		  time_mosq.o \
@@ -78,6 +79,9 @@ send_client_mosq.o : send_client_mosq.c send_mosq.h
 	${CROSS_COMPILE}$(CC) $(LIB_CFLAGS) -c $< -o $@
 
 socks_mosq.o : socks_mosq.c
+	${CROSS_COMPILE}$(CC) $(LIB_CFLAGS) -c $< -o $@
+
+httpproxy_mosq.o : httpproxy_mosq.c
 	${CROSS_COMPILE}$(CC) $(LIB_CFLAGS) -c $< -o $@
 
 srv_mosq.o : srv_mosq.c

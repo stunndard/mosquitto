@@ -87,6 +87,16 @@ int _mosquitto_packet_read(struct mosquitto *mosq);
 #ifdef WITH_TLS
 int _mosquitto_socket_apply_tls(struct mosquitto *mosq);
 int mosquitto__socket_connect_tls(struct mosquitto *mosq);
+int _mosquitto_socket_starttls(struct mosquitto *mosq);
 #endif
+
+#ifdef WITH_HTTP_PROXY
+int _mosquitto_socket_connect_notls(struct mosquitto *mosq, const char *host, uint16_t port, const char *bind_address, bool blocking);
+#endif
+
+#ifdef WITH_SOCKS
+int _mosquitto_socket_connect_notls(struct mosquitto *mosq, const char *host, uint16_t port, const char *bind_address, bool blocking);
+#endif
+
 
 #endif

@@ -90,6 +90,7 @@ class mosqpp_EXPORT mosquittopp {
 		bool want_write();
 		int threaded_set(bool threaded=true);
 		int socks5_set(const char *host, int port=1080, const char *username=NULL, const char *password=NULL);
+		int httpproxy_set(const char *host, int port=3128, const char *username=NULL, const char *password=NULL);
 		
 		virtual void on_connect(int rc) {return;};
 		virtual void on_disconnect(int rc) {return;};

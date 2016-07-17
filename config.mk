@@ -76,6 +76,9 @@ WITH_DOCS:=yes
 # Build with client support for SOCK5 proxy.
 WITH_SOCKS:=yes
 
+# Build with client support for HTTP proxy.
+WITH_HTTP_PROXY:=yes
+
 # =============================================================================
 # End of user configuration
 # =============================================================================
@@ -184,6 +187,11 @@ endif
 ifeq ($(WITH_SOCKS),yes)
 	LIB_CFLAGS:=$(LIB_CFLAGS) -DWITH_SOCKS
 	CLIENT_CFLAGS:=$(CLIENT_CFLAGS) -DWITH_SOCKS
+endif
+
+ifeq ($(WITH_HTTP_PROXY),yes)
+	LIB_CFLAGS:=$(LIB_CFLAGS) -DWITH_HTTP_PROXY
+	CLIENT_CFLAGS:=$(CLIENT_CFLAGS) -DWITH_HTTP_PROXY
 endif
 
 ifeq ($(WITH_UUID),yes)

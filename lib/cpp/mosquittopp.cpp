@@ -288,6 +288,15 @@ int mosquittopp::socks5_set(const char *host, int port, const char *username, co
 #endif
 }
 
+int mosquittopp::httpproxy_set(const char *host, int port, const char *username, const char *password)
+{
+#ifdef WITH_HTTP_PROXY
+	return mosquitto_httpproxy_set(m_mosq, host, port, username, password);
+#else
+	return MOSQ_ERR_NOT_SUPPORTED;
+#endif
+}
+
 
 int mosquittopp::tls_set(const char *cafile, const char *capath, const char *certfile, const char *keyfile, int (*pw_callback)(char *buf, int size, int rwflag, void *userdata))
 {

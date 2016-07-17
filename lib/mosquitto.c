@@ -39,6 +39,7 @@ typedef int ssize_t;
 #include <read_handle.h>
 #include <send_mosq.h>
 #include <socks_mosq.h>
+#include <httpproxy_mosq.h>
 #include <time_mosq.h>
 #include <tls_mosq.h>
 #include <util_mosq.h>
@@ -482,6 +483,11 @@ static int _mosquitto_reconnect(struct mosquitto *mosq, bool blocking)
 		mosq->state = mosq_cs_socks5_new;
 	}else
 #endif
+#ifdef WITH_HTTP_PROXY
+	if(mosq->httpproxy_host){
+		mosq->state = mosq_cs_httpproxy_new;
+	}else
+#endif
 	{
 		mosq->state = mosq_cs_new;
 	}
@@ -522,7 +528,12 @@ static int _mosquitto_reconnect(struct mosquitto *mosq, bool blocking)
 
 #ifdef WITH_SOCKS
 	if(mosq->socks5_host){
-		rc = _mosquitto_socket_connect(mosq, mosq->socks5_host, mosq->socks5_port, mosq->bind_address, blocking);
+		rc = _mosquitto_socket_connect_notls(mosq, mosq->socks5_host, mosq->socks5_port, mosq->bind_address, blocking);
+	}else
+#endif
+#ifdef WITH_HTTP_PROXY
+	if(mosq->httpproxy_host){
+		rc = _mosquitto_socket_connect_notls(mosq, mosq->httpproxy_host, mosq->httpproxy_port, mosq->bind_address, blocking);
 	}else
 #endif
 	{
@@ -535,6 +546,11 @@ static int _mosquitto_reconnect(struct mosquitto *mosq, bool blocking)
 #ifdef WITH_SOCKS
 	if(mosq->socks5_host){
 		return mosquitto__socks5_send(mosq);
+	}else
+#endif
+#ifdef WITH_HTTP_PROXY
+	if(mosq->httpproxy_host){
+		return mosquitto__httpproxy_send(mosq);
 	}else
 #endif
 	{
@@ -1150,6 +1166,11 @@ int mosquitto_loop_read(struct mosquitto *mosq, int max_packets)
 #ifdef WITH_SOCKS
 		if(mosq->socks5_host){
 			rc = mosquitto__socks5_read(mosq);
+		}else
+#endif
+#ifdef WITH_HTTP_PROXY
+		if(mosq->httpproxy_host){
+			rc = mosquitto__httpproxy_read(mosq);
 		}else
 #endif
 		{
